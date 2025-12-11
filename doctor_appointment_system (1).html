@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment System - Dhaka</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .emergency-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255,68,68,0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .emergency-btn:hover {
+            background: #ff0000;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #e9ecef;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            margin-bottom: -3px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .filters {
+            padding: 30px;
+            background: #f8f9fa;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .doctors-grid {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .doctor-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .doctor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .doctor-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .doctor-info h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .specialty {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .doctor-details {
+            margin: 15px 0;
+            color: #666;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .detail-row strong {
+            min-width: 80px;
+            color: #333;
+        }
+
+        .schedule {
+            background: #f0f4ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .time-slot {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            border: 1px solid #ddd;
+        }
+
+        .book-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .book-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .serial-number {
+            font-size: 2em;
+            color: #ff4444;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .doctors-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .doctors-table th,
+        .doctors-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .doctors-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .doctors-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .ambulance-grid {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .ambulance-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .ambulance-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #ff4444;
+        }
+
+        .ambulance-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .ambulance-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .ambulance-card p {
+            color: #666;
+            margin: 8px 0;
+        }
+
+        .call-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .call-btn:hover {
+            background: #ff0000;
+        }
+
+        .booking-form {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .booking-form h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #ff0000;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .emergency-btn {
+                position: static;
+                margin-top: 15px;
+            }
+
+            .doctors-grid,
+            .ambulance-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-btn {
+                font-size: 0.9em;
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Doctor Appointment System</h1>
+            <p>Find and Book Appointments with Top Doctors in Dhaka</p>
+            <button class="emergency-btn" onclick="callEmergency()">🚨 Emergency: 01617791655</button>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showPage('home')">Home</button>
+            <button class="tab-btn" onclick="showPage('doctors-list')">All Doctors List</button>
+            <button class="tab-btn" onclick="showPage('ambulance')">Ambulance Service</button>
+        </div>
+
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="hospitalFilter">Hospital:</label>
+                    <select id="hospitalFilter">
+                        <option value="">All Hospitals</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="specialtyFilter">Specialty:</label>
+                    <select id="specialtyFilter">
+                        <option value="">All Specialties</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dayFilter">Day:</label>
+                    <select id="dayFilter">
+                        <option value="">All Days</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="searchFilter">Search Doctor:</label>
+                    <input type="text" id="searchFilter" placeholder="Enter doctor name...">
+                </div>
+            </div>
+
+            <div class="doctors-grid" id="doctorsGrid"></div>
+        </div>
+
+        <!-- All Doctors List Page -->
+        <div id="doctors-list" class="page">
+            <div class="table-container">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Complete Doctors List</h2>
+                <table class="doctors-table" id="doctorsTable">
+                    <thead>
+                        <tr>
+                            <th>Serial</th>
+                            <th>Doctor Name</th>
+                            <th>Specialty</th>
+                            <th>Hospital</th>
+                            <th>Available Days</th>
+                            <th>Time Slots</th>
+                            <th>Fee (BDT)</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctorsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Ambulance Service Page -->
+        <div id="ambulance" class="page">
+            <div class="ambulance-grid" id="ambulanceGrid"></div>
+        </div>
+
+        <!-- Ambulance Booking Form Page -->
+        <div id="ambulance-booking" class="page">
+            <div class="booking-form">
+                <button class="back-btn" onclick="showPage('ambulance')">← Back to Ambulance List</button>
+                <h2>🚑 Book Ambulance Service</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                    <strong id="selectedAmbulance"></strong>
+                </p>
+                <form onsubmit="bookAmbulance(event)">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="patientName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="patientPhone" required placeholder="01XXXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Pickup Location *</label>
+                        <textarea id="patientLocation" required placeholder="Enter detailed address..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Book Ambulance (FREE)</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Confirmation Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <h2>✅ Appointment Confirmed!</h2>
+            <p id="modalMessage"></p>
+            <div class="serial-number" id="serialNumber"></div>
+            <button class="close-modal" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Ambulance Confirmation Modal -->
+    <div class="modal" id="ambulanceModal">
+        <div class="modal-content">
+            <h2>✅ Ambulance Booked Successfully!</h2>
+            <p id="ambulanceMessage"></p>
+            <button class="close-modal" onclick="closeAmbulanceModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const doctors = [
+            {name: "Dr. Mohammad Rahman", specialty: "Cardiologist", hospital: "Square Hospital", days: ["Saturday", "Monday", "Wednesday"], times: ["9:00 AM", "2:00 PM"], fee: 1500, phone: "01711-123456"},
+            {name: "Dr. Fatema Begum", specialty: "Gynecologist", hospital: "United Hospital", days: ["Sunday", "Tuesday", "Thursday"], times: ["10:00 AM", "4:00 PM"], fee: 1200, phone: "01712-234567"},
+            {name: "Dr. Abdul Karim", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Saturday", "Wednesday"], times: ["3:00 PM", "6:00 PM"], fee: 1800, phone: "01713-345678"},
+            {name: "Dr. Nasrin Akter", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Sunday", "Monday", "Thursday"], times: ["8:00 AM", "1:00 PM"], fee: 1000, phone: "01714-456789"},
+            {name: "Dr. Kamal Hossain", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 1600, phone: "01715-567890"},
+            {name: "Dr. Shireen Ahmed", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Saturday", "Sunday", "Tuesday"], times: ["9:00 AM", "3:00 PM"], fee: 1100, phone: "01716-678901"},
+            {name: "Dr. Rahim Uddin", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["2:00 PM", "7:00 PM"], fee: 1400, phone: "01717-789012"},
+            {name: "Dr. Ayesha Siddika", specialty: "ENT Specialist", hospital: "United Hospital", days: ["Sunday", "Thursday"], times: ["10:00 AM", "4:00 PM"], fee: 1300, phone: "01718-890123"},
+            {name: "Dr. Mahbub Alam", specialty: "Urologist", hospital: "Labaid Hospital", days: ["Saturday", "Tuesday"], times: ["11:00 AM", "6:00 PM"], fee: 1500, phone: "01719-901234"},
+            {name: "Dr. Razia Sultana", specialty: "Psychiatrist", hospital: "Apollo Hospital", days: ["Monday", "Wednesday", "Thursday"], times: ["9:00 AM", "2:00 PM"], fee: 1700, phone: "01720-012345"},
+            {name: "Dr. Faruk Ahmed", specialty: "Gastroenterologist", hospital: "BIRDEM Hospital", days: ["Sunday", "Tuesday"], times: ["10:00 AM", "5:00 PM"], fee: 1400, phone: "01721-123456"},
+            {name: "Dr. Sultana Parvin", specialty: "Ophthalmologist", hospital: "Square Hospital", days: ["Saturday", "Thursday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01722-234567"},
+            {name: "Dr. Jahangir Kabir", specialty: "Pulmonologist", hospital: "Popular Hospital", days: ["Sunday", "Wednesday"], times: ["3:00 PM", "6:00 PM"], fee: 1600, phone: "01723-345678"},
+            {name: "Dr. Hasina Khatun", specialty: "Endocrinologist", hospital: "United Hospital", days: ["Monday", "Thursday"], times: ["9:00 AM", "4:00 PM"], fee: 1500, phone: "01724-456789"},
+            {name: "Dr. Anwar Hossain", specialty: "Oncologist", hospital: "Labaid Hospital", days: ["Tuesday", "Saturday"], times: ["11:00 AM", "5:00 PM"], fee: 2000, phone: "01725-567890"},
+            {name: "Dr. Taslima Begum", specialty: "Rheumatologist", hospital: "Apollo Hospital", days: ["Sunday", "Wednesday"], times: ["10:00 AM", "3:00 PM"], fee: 1300, phone: "01726-678901"},
+            {name: "Dr. Salim Khan", specialty: "Nephrologist", hospital: "BIRDEM Hospital", days: ["Saturday", "Monday"], times: ["2:00 PM", "6:00 PM"], fee: 1800, phone: "01727-789012"},
+            {name: "Dr. Nargis Akter", specialty: "Hematologist", hospital: "Square Hospital", days: ["Tuesday", "Thursday"], times: ["9:00 AM", "2:00 PM"], fee: 1400, phone: "01728-890123"},
+            {name: "Dr. Rafiq Islam", specialty: "Cardiologist", hospital: "Popular Hospital", days: ["Sunday", "Wednesday"], times: ["10:00 AM", "5:00 PM"], fee: 1600, phone: "01729-901234"},
+            {name: "Dr. Rehana Parvin", specialty: "Gynecologist", hospital: "United Hospital", days: ["Monday", "Thursday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01730-012345"},
+            {name: "Dr. Masum Rahman", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Saturday", "Tuesday"], times: ["3:00 PM", "7:00 PM"], fee: 1700, phone: "01731-123456"},
+            {name: "Dr. Farhana Yasmin", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Sunday", "Monday"], times: ["9:00 AM", "2:00 PM"], fee: 1000, phone: "01732-234567"},
+            {name: "Dr. Habib Ullah", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Wednesday", "Thursday"], times: ["11:00 AM", "4:00 PM"], fee: 1600, phone: "01733-345678"},
+            {name: "Dr. Sabina Khatun", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Saturday", "Sunday"], times: ["10:00 AM", "3:00 PM"], fee: 1100, phone: "01734-456789"},
+            {name: "Dr. Kamrul Hasan", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "6:00 PM"], fee: 1500, phone: "01735-567890"},
+            {name: "Dr. Mina Begum", specialty: "ENT Specialist", hospital: "United Hospital", days: ["Monday", "Wednesday"], times: ["9:00 AM", "4:00 PM"], fee: 1300, phone: "01736-678901"},
+            {name: "Dr. Shakil Ahmed", specialty: "Urologist", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 1500, phone: "01737-789012"},
+            {name: "Dr. Nasima Akter", specialty: "Psychiatrist", hospital: "Apollo Hospital", days: ["Saturday", "Tuesday"], times: ["10:00 AM", "3:00 PM"], fee: 1700, phone: "01738-890123"},
+            {name: "Dr. Aziz Rahman", specialty: "Gastroenterologist", hospital: "BIRDEM Hospital", days: ["Monday", "Wednesday"], times: ["2:00 PM", "7:00 PM"], fee: 1400, phone: "01739-901234"},
+            {name: "Dr. Monira Khatun", specialty: "Ophthalmologist", hospital: "Square Hospital", days: ["Sunday", "Thursday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01740-012345"},
+            {name: "Dr. Iqbal Hossain", specialty: "Pulmonologist", hospital: "Popular Hospital", days: ["Tuesday", "Saturday"], times: ["3:00 PM", "6:00 PM"], fee: 1600, phone: "01741-123456"},
+            {name: "Dr. Shahnaz Parvin", specialty: "Endocrinologist", hospital: "United Hospital", days: ["Sunday", "Wednesday"], times: ["9:00 AM", "2:00 PM"], fee: 1500, phone: "01742-234567"},
+            {name: "Dr. Mizanur Rahman", specialty: "Oncologist", hospital: "Labaid Hospital", days: ["Monday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 2000, phone: "01743-345678"},
+            {name: "Dr. Parvin Sultana", specialty: "Rheumatologist", hospital: "Apollo Hospital", days: ["Saturday", "Tuesday"], times: ["10:00 AM", "4:00 PM"], fee: 1300, phone: "01744-456789"},
+            {name: "Dr. Jasim Uddin", specialty: "Nephrologist", hospital: "BIRDEM Hospital", days: ["Sunday", "Thursday"], times: ["2:00 PM", "6:00 PM"], fee: 1800, phone: "01745-567890"},
+            {name: "Dr. Shamsun Nahar", specialty: "Hematologist", hospital: "Square Hospital", days: ["Monday", "Wednesday"], times: ["9:00 AM", "3:00 PM"], fee: 1400, phone: "01746-678901"},
+            {name: "Dr. Lutfur Rahman", specialty: "Cardiologist", hospital: "Popular Hospital", days: ["Tuesday", "Thursday"], times: ["10:00 AM", "5:00 PM"], fee: 1600, phone: "01747-789012"},
+            {name: "Dr. Rowshan Ara", specialty: "Gynecologist", hospital: "United Hospital", days: ["Saturday", "Monday"], times: ["8:00 AM", "2:00 PM"], fee: 1200, phone: "01748-890123"},
+            {name: "Dr. Jahirul Islam", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Sunday", "Wednesday"], times: ["3:00 PM", "7:00 PM"], fee: 1700, phone: "01749-901234"},
+            {name: "Dr. Dilruba Yasmin", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Tuesday", "Thursday"], times: ["9:00 AM", "1:00 PM"], fee: 1000, phone: "01750-012345"},
+            {name: "Dr. Mostafa Kamal", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Saturday", "Monday"], times: ["11:00 AM", "4:00 PM"], fee: 1600, phone: "01751-123456"},
+            {name: "Dr. Anjuman Ara", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Sunday", "Wednesday"], times: ["10:00 AM", "3:00 PM"], fee: 1100, phone: "01752-234567"},
+            {name: "Dr. Nurul Amin", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Monday", "Thursday"], times: ["2:00 PM", "6:00 PM"], fee: 1500, phone: "01753-345678"},
+            {name: "Dr. Rubina Khatun", specialty: "ENT Specialist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["9:00 AM", "4:00 PM"], fee: 1300, phone: "01754-456789"},
+            {name: "Dr. Sohel Rana", specialty: "Urologist", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 1500, phone: "01755-567890"},
+            {name: "Dr. Shahida Begum", specialty: "Psychiatrist", hospital: "Apollo Hospital", days: ["Monday", "Wednesday"], times: ["10:00 AM", "3:00 PM"], fee: 1700, phone: "01756-678901"},
+            {name: "Dr. Harun Rashid", specialty: "Gastroenterologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "7:00 PM"], fee: 1400, phone: "01757-789012"},
+            {name: "Dr. Laila Arjumand", specialty: "Ophthalmologist", hospital: "Square Hospital", days: ["Saturday", "Sunday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01758-890123"},
+            {name: "Dr. Shamim Ahmed", specialty: "Pulmonologist", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["3:00 PM", "6:00 PM"], fee: 1600, phone: "01759-901234"},
+            {name: "Dr. Khaleda Akter", specialty: "Endocrinologist", hospital: "United Hospital", days: ["Tuesday", "Thursday"], times: ["9:00 AM", "2:00 PM"], fee: 1500, phone: "01760-012345"},
+            {name: "Dr. Aslam Hossain", specialty: "Oncologist", hospital: "Labaid Hospital", days: ["Sunday", "Wednesday"], times: ["11:00 AM", "5:00 PM"], fee: 2000, phone: "01761-123456"},
+            {name: "Dr. Feroza Begum", specialty: "Rheumatologist", hospital: "Apollo Hospital", days: ["Saturday", "Monday"], times: ["10:00 AM", "4:00 PM"], fee: 1300, phone: "01762-234567"},
+            {name: "Dr. Shafiqul Islam", specialty: "Nephrologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "6:00 PM"], fee: 1800, phone: "01763-345678"},
+            {name: "Dr. Bilkis Banu", specialty: "Hematologist", hospital: "Square Hospital", days: ["Sunday", "Wednesday"], times: ["9:00 AM", "3:00 PM"], fee: 1400, phone: "01764-456789"},
+            {name: "Dr. Rezaul Karim", specialty: "Cardiologist", hospital: "Popular Hospital", days: ["Monday", "Thursday"], times: ["10:00 AM", "5:00 PM"], fee: 1600, phone: "01765-567890"},
+            {name: "Dr. Aleya Begum", specialty: "Gynecologist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["8:00 AM", "2:00 PM"], fee: 1200, phone: "01766-678901"},
+            {name: "Dr. Alamgir Kabir", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["3:00 PM", "7:00 PM"], fee: 1700, phone: "01767-789012"},
+            {name: "Dr. Maksuda Khatun", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Monday", "Wednesday"], times: ["9:00 AM", "1:00 PM"], fee: 1000, phone: "01768-890123"},
+            {name: "Dr. Hafizur Rahman", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Saturday"], times: ["11:00 AM", "4:00 PM"], fee: 1600, phone: "01769-901234"},
+            {name: "Dr. Shahana Parveen", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Sunday", "Thursday"], times: ["10:00 AM", "3:00 PM"], fee: 1100, phone: "01770-012345"},
+            {name: "Dr. Delwar Hossain", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["2:00 PM", "6:00 PM"], fee: 1500, phone: "01771-123456"},
+            {name: "Dr. Rashida Sultana", specialty: "ENT Specialist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["9:00 AM", "4:00 PM"], fee: 1300, phone: "01772-234567"},
+            {name: "Dr. Bazlur Rahman", specialty: "Urologist", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 1500, phone: "01773-345678"},
+            {name: "Dr. Nazma Begum", specialty: "Psychiatrist", hospital: "Apollo Hospital", days: ["Monday", "Wednesday"], times: ["10:00 AM", "3:00 PM"], fee: 1700, phone: "01774-456789"},
+            {name: "Dr. Abdur Razzak", specialty: "Gastroenterologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "7:00 PM"], fee: 1400, phone: "01775-567890"},
+            {name: "Dr. Jannatul Ferdous", specialty: "Ophthalmologist", hospital: "Square Hospital", days: ["Saturday", "Sunday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01776-678901"},
+            {name: "Dr. Sirajul Islam", specialty: "Pulmonologist", hospital: "Popular Hospital", days: ["Monday", "Thursday"], times: ["3:00 PM", "6:00 PM"], fee: 1600, phone: "01777-789012"},
+            {name: "Dr. Tahmina Akter", specialty: "Endocrinologist", hospital: "United Hospital", days: ["Tuesday", "Saturday"], times: ["9:00 AM", "2:00 PM"], fee: 1500, phone: "01778-890123"},
+            {name: "Dr. Mannan Miah", specialty: "Oncologist", hospital: "Labaid Hospital", days: ["Sunday", "Wednesday"], times: ["11:00 AM", "5:00 PM"], fee: 2000, phone: "01779-901234"},
+            {name: "Dr. Yasmin Sultana", specialty: "Rheumatologist", hospital: "Apollo Hospital", days: ["Monday", "Thursday"], times: ["10:00 AM", "4:00 PM"], fee: 1300, phone: "01780-012345"},
+            {name: "Dr. Mujibur Rahman", specialty: "Nephrologist", hospital: "BIRDEM Hospital", days: ["Saturday", "Tuesday"], times: ["2:00 PM", "6:00 PM"], fee: 1800, phone: "01781-123456"},
+            {name: "Dr. Rahima Khatun", specialty: "Hematologist", hospital: "Square Hospital", days: ["Sunday", "Wednesday"], times: ["9:00 AM", "3:00 PM"], fee: 1400, phone: "01782-234567"},
+            {name: "Dr. Azizul Haque", specialty: "Cardiologist", hospital: "Popular Hospital", days: ["Monday", "Thursday"], times: ["10:00 AM", "5:00 PM"], fee: 1600, phone: "01783-345678"},
+            {name: "Dr. Munira Sultana", specialty: "Gynecologist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["8:00 AM", "2:00 PM"], fee: 1200, phone: "01784-456789"},
+            {name: "Dr. Shamsul Alam", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Sunday", "Wednesday"], times: ["3:00 PM", "7:00 PM"], fee: 1700, phone: "01785-567890"},
+            {name: "Dr. Kohinoor Begum", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Monday", "Thursday"], times: ["9:00 AM", "1:00 PM"], fee: 1000, phone: "01786-678901"},
+            {name: "Dr. Mahmudul Hasan", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Saturday"], times: ["11:00 AM", "4:00 PM"], fee: 1600, phone: "01787-789012"},
+            {name: "Dr. Sultana Razia", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Sunday", "Thursday"], times: ["10:00 AM", "3:00 PM"], fee: 1100, phone: "01788-890123"},
+            {name: "Dr. Nurul Huda", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["2:00 PM", "6:00 PM"], fee: 1500, phone: "01789-901234"},
+            {name: "Dr. Amina Khatun", specialty: "ENT Specialist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["9:00 AM", "4:00 PM"], fee: 1300, phone: "01790-012345"},
+            {name: "Dr. Zakir Hossain", specialty: "Urologist", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["11:00 AM", "5:00 PM"], fee: 1500, phone: "01791-123456"},
+            {name: "Dr. Shahnaz Begum", specialty: "Psychiatrist", hospital: "Apollo Hospital", days: ["Monday", "Wednesday"], times: ["10:00 AM", "3:00 PM"], fee: 1700, phone: "01792-234567"},
+            {name: "Dr. Hanif Molla", specialty: "Gastroenterologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "7:00 PM"], fee: 1400, phone: "01793-345678"},
+            {name: "Dr. Farida Yasmin", specialty: "Ophthalmologist", hospital: "Square Hospital", days: ["Saturday", "Sunday"], times: ["8:00 AM", "1:00 PM"], fee: 1200, phone: "01794-456789"},
+            {name: "Dr. Rafiqul Islam", specialty: "Pulmonologist", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["3:00 PM", "6:00 PM"], fee: 1600, phone: "01795-567890"},
+            {name: "Dr. Salma Akter", specialty: "Endocrinologist", hospital: "United Hospital", days: ["Tuesday", "Thursday"], times: ["9:00 AM", "2:00 PM"], fee: 1500, phone: "01796-678901"},
+            {name: "Dr. Humayun Kabir", specialty: "Oncologist", hospital: "Labaid Hospital", days: ["Sunday", "Wednesday"], times: ["11:00 AM", "5:00 PM"], fee: 2000, phone: "01797-789012"},
+            {name: "Dr. Rukhsana Begum", specialty: "Rheumatologist", hospital: "Apollo Hospital", days: ["Saturday", "Monday"], times: ["10:00 AM", "4:00 PM"], fee: 1300, phone: "01798-890123"},
+            {name: "Dr. Nurul Islam", specialty: "Nephrologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Thursday"], times: ["2:00 PM", "6:00 PM"], fee: 1800, phone: "01799-901234"},
+            {name: "Dr. Hosneara Begum", specialty: "Hematologist", hospital: "Square Hospital", days: ["Sunday", "Wednesday"], times: ["9:00 AM", "3:00 PM"], fee: 1400, phone: "01800-012345"},
+            {name: "Dr. Altaf Hossain", specialty: "Cardiologist", hospital: "Popular Hospital", days: ["Monday", "Thursday"], times: ["10:00 AM", "5:00 PM"], fee: 1600, phone: "01801-123456"},
+            {name: "Dr. Parveen Sultana", specialty: "Gynecologist", hospital: "United Hospital", days: ["Saturday", "Tuesday"], times: ["8:00 AM", "2:00 PM"], fee: 1200, phone: "01802-234567"},
+            {name: "Dr. Golam Morshed", specialty: "Orthopedic Surgeon", hospital: "Labaid Hospital", days: ["Sunday", "Thursday"], times: ["3:00 PM", "7:00 PM"], fee: 1700, phone: "01803-345678"},
+            {name: "Dr. Masuda Khatun", specialty: "Pediatrician", hospital: "Apollo Hospital", days: ["Monday", "Wednesday"], times: ["9:00 AM", "1:00 PM"], fee: 1000, phone: "01804-456789"},
+            {name: "Dr. Enayet Ullah", specialty: "Neurologist", hospital: "BIRDEM Hospital", days: ["Tuesday", "Saturday"], times: ["11:00 AM", "4:00 PM"], fee: 1600, phone: "01805-567890"},
+            {name: "Dr. Jahanara Begum", specialty: "Dermatologist", hospital: "Square Hospital", days: ["Sunday", "Thursday"], times: ["10:00 AM", "3:00 PM"], fee: 1100, phone: "01806-678901"},
+            {name: "Dr. Mokhlesur Rahman", specialty: "General Surgeon", hospital: "Popular Hospital", days: ["Monday", "Wednesday"], times: ["2:00 PM", "6:00 PM"], fee: 1500, phone: "01807-789012"}
+        ];
+
+        const ambulances = [
+            {name: "Square Hospital Ambulance", phone: "01713-000001", type: "ICU Ambulance", location: "Panthapath, Dhaka"},
+            {name: "United Hospital Emergency", phone: "01713-000002", type: "Life Support", location: "Gulshan, Dhaka"},
+            {name: "Apollo Hospital Ambulance", phone: "01713-000003", type: "General Ambulance", location: "Bashundhara, Dhaka"},
+            {name: "Labaid Hospital Service", phone: "01713-000004", type: "ICU Ambulance", location: "Dhanmondi, Dhaka"},
+            {name: "BIRDEM Ambulance", phone: "01713-000005", type: "General Ambulance", location: "Shahbagh, Dhaka"},
+            {name: "Popular Hospital Emergency", phone: "01713-000006", type: "Life Support", location: "Dhanmondi, Dhaka"},
+            {name: "Dhaka Medical Ambulance", phone: "01713-000007", type: "ICU Ambulance", location: "Bakshi Bazar, Dhaka"},
+            {name: "City Ambulance Service", phone: "01713-000008", type: "General Ambulance", location: "Mohakhali, Dhaka"},
+            {name: "Red Crescent Ambulance", phone: "01713-000009", type: "Life Support", location: "Karwan Bazar, Dhaka"},
+            {name: "Quick Response Ambulance", phone: "01713-000010", type: "ICU Ambulance", location: "Uttara, Dhaka"}
+        ];
+
+        let filteredDoctors = [...doctors];
+        let selectedAmbulanceService = null;
+
+        function initializeFilters() {
+            const hospitals = [...new Set(doctors.map(d => d.hospital))].sort();
+            const specialties = [...new Set(doctors.map(d => d.specialty))].sort();
+
+            const hospitalSelect = document.getElementById('hospitalFilter');
+            const specialtySelect = document.getElementById('specialtyFilter');
+
+            hospitals.forEach(hospital => {
+                const option = document.createElement('option');
+                option.value = hospital;
+                option.textContent = hospital;
+                hospitalSelect.appendChild(option);
+            });
+
+            specialties.forEach(specialty => {
+                const option = document.createElement('option');
+                option.value = specialty;
+                option.textContent = specialty;
+                specialtySelect.appendChild(option);
+            });
+        }
+
+        function createDoctorCard(doctor) {
+            const initial = doctor.name.split(' ')[1][0];
+            return `
+                <div class="doctor-card">
+                    <div class="doctor-header">
+                        <div class="doctor-avatar">${initial}</div>
+                        <div class="doctor-info">
+                            <h3>${doctor.name}</h3>
+                            <div class="specialty">${doctor.specialty}</div>
+                        </div>
+                    </div>
+                    <div class="doctor-details">
+                        <div class="detail-row">
+                            <strong>Hospital:</strong> ${doctor.hospital}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Days:</strong> ${doctor.days.join(', ')}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Fee:</strong> ৳${doctor.fee}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Phone:</strong> ${doctor.phone}
+                        </div>
+                    </div>
+                    <div class="schedule">
+                        <div class="schedule-title">Available Time Slots:</div>
+                        <div class="time-slots">
+                            ${doctor.times.map(time => `<div class="time-slot">${time}</div>`).join('')}
+                        </div>
+                    </div>
+                    <button class="book-btn" onclick="bookAppointment('${doctor.name}', '${doctor.hospital}', '${doctor.specialty}')">
+                        Book Appointment
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderDoctors() {
+            const grid = document.getElementById('doctorsGrid');
+            if (filteredDoctors.length === 0) {
+                grid.innerHTML = '<div class="no-results">No doctors found matching your criteria.</div>';
+                return;
+            }
+            grid.innerHTML = filteredDoctors.map(doctor => createDoctorCard(doctor)).join('');
+        }
+
+        function filterDoctors() {
+            const hospital = document.getElementById('hospitalFilter').value;
+            const specialty = document.getElementById('specialtyFilter').value;
+            const day = document.getElementById('dayFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredDoctors = doctors.filter(doctor => {
+                const matchHospital = !hospital || doctor.hospital === hospital;
+                const matchSpecialty = !specialty || doctor.specialty === specialty;
+                const matchDay = !day || doctor.days.includes(day);
+                const matchSearch = !search || doctor.name.toLowerCase().includes(search);
+                return matchHospital && matchSpecialty && matchDay && matchSearch;
+            });
+
+            renderDoctors();
+        }
+
+        function generateSerialNumber() {
+            return String(Math.floor(Math.random() * 9) + 1).padStart(2, '0');
+        }
+
+        function bookAppointment(doctorName, hospital, specialty) {
+            const modal = document.getElementById('bookingModal');
+            const message = document.getElementById('modalMessage');
+            const serialNum = document.getElementById('serialNumber');
+            
+            const serial = generateSerialNumber();
+            
+            message.innerHTML = `
+                <strong>Doctor:</strong> ${doctorName}<br>
+                <strong>Specialty:</strong> ${specialty}<br>
+                <strong>Hospital:</strong> ${hospital}<br><br>
+                Your appointment has been successfully booked!
+            `;
+            serialNum.textContent = `Serial Number: ${serial}`;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        function showPage(pageName) {
+            const pages = document.querySelectorAll('.page');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            pages.forEach(page => page.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(pageName).classList.add('active');
+            
+            if (pageName === 'home') {
+                tabs[0].classList.add('active');
+            } else if (pageName === 'doctors-list') {
+                tabs[1].classList.add('active');
+                renderDoctorsTable();
+            } else if (pageName === 'ambulance') {
+                tabs[2].classList.add('active');
+                renderAmbulances();
+            }
+        }
+
+        function renderDoctorsTable() {
+            const tbody = document.getElementById('doctorsTableBody');
+            tbody.innerHTML = doctors.map((doctor, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${doctor.name}</td>
+                    <td>${doctor.specialty}</td>
+                    <td>${doctor.hospital}</td>
+                    <td>${doctor.days.join(', ')}</td>
+                    <td>${doctor.times.join(', ')}</td>
+                    <td>৳${doctor.fee}</td>
+                    <td>${doctor.phone}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAmbulances() {
+            const grid = document.getElementById('ambulanceGrid');
+            grid.innerHTML = ambulances.map(ambulance => `
+                <div class="ambulance-card">
+                    <div class="ambulance-icon">🚑</div>
+                    <h3>${ambulance.name}</h3>
+                    <p><strong>Type:</strong> ${ambulance.type}</p>
+                    <p><strong>Location:</strong> ${ambulance.location}</p>
+                    <p><strong>Phone:</strong> ${ambulance.phone}</p>
+                    <button class="call-btn" onclick="selectAmbulance('${ambulance.name}', '${ambulance.phone}')">
+                        Book This Ambulance
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function selectAmbulance(name, phone) {
+            selectedAmbulanceService = {name, phone};
+            document.getElementById('selectedAmbulance').textContent = name;
+            showPage('ambulance-booking');
+        }
+
+        function bookAmbulance(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('patientName').value;
+            const phone = document.getElementById('patientPhone').value;
+            const location = document.getElementById('patientLocation').value;
+            
+            const modal = document.getElementById('ambulanceModal');
+            const message = document.getElementById('ambulanceMessage');
+            
+            message.innerHTML = `
+                <p style="font-size: 1.2em; color: #333; margin: 20px 0;">
+                    <strong>Ambulance booked by ${name}</strong>
+                </p>
+                <p style="color: #666;">Service: ${selectedAmbulanceService.name}</p>
+                <p style="color: #666;">Contact: ${selectedAmbulanceService.phone}</p>
+                <p style="color: #666;">Pickup Location: ${location}</p>
+                <p style="color: #666;">Your Phone: ${phone}</p>
+                <p style="font-size: 1.3em; color: #00cc00; margin-top: 20px; font-weight: bold;">
+                    ✅ This service is FREE!
+                </p>
+                <p style="color: #666; margin-top: 10px;">
+                    The ambulance will arrive at your location shortly.
+                </p>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            // Reset form
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientPhone').value = '';
+            document.getElementById('patientLocation').value = '';
+        }
+
+        function closeAmbulanceModal() {
+            document.getElementById('ambulanceModal').style.display = 'none';
+            showPage('ambulance');
+        }
+
+        function callEmergency() {
+            alert('🚨 Emergency Hotline: 01617791655\n\nCalling emergency services...');
+            window.location.href = 'tel:01617791655';
+        }
+
+        document.getElementById('hospitalFilter').addEventListener('change', filterDoctors);
+        document.getElementById('specialtyFilter').addEventListener('change', filterDoctors);
+        document.getElementById('dayFilter').addEventListener('change', filterDoctors);
+        document.getElementById('searchFilter').addEventListener('input', filterDoctors);
+
+        initializeFilters();
+        renderDoctors();
+    </script>
+</body>
+</html>
